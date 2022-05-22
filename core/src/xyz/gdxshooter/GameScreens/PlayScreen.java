@@ -239,9 +239,11 @@ public class PlayScreen implements Screen {
                     Array<Float> routePointsX = new Array<>(new Float[]{1080f, 600f, 800f, 100f});
                     spawnCow(pos, routePointsX, CowType.WHITE);
                 } else if (i == 6) {
+
                     Vector2 pos = new Vector2(1176, 72);
                     Array<Float> routePointsX = new Array<>(new Float[]{1176f, 1500f, 1176f, 1350f});
-                    spawnCow(pos, routePointsX, CowType.BLACK);
+                    spawnCow(pos, routePointsX, CowType.WHITE);
+
                 } else if (i == 7) {
                     Vector2 pos = new Vector2(1656, 170);
                     Array<Float> routePointsX = new Array<>(new Float[]{1872f,1600f});
