@@ -75,35 +75,58 @@ public class Level {
                 break;
 
             if (Intersector.overlaps(character.getHitbox(), rect)) {
-                if (character instanceof Bullet && !character.isDead())
-                    character.takeDamage(delta, 1);
 
                 // столкновение с левой границей прямоугольника
-                if (character.getPositionX() + character.getHitbox().width > rect.x
+                if ((character instanceof Player
+                        && character.getPositionX() + character.getHitbox().width > rect.x
                         && character.getPositionX() < rect.x
                         && character.getPositionY() < rect.y + rect.height
                         && character.getPositionY() + character.getHitbox().height > rect.y
+                        && character.getVelocityX() > 0)
+                  || (character instanceof Bullet
+                        && character.getPositionX() + character.getHitbox().width > rect.x
                         && character.getVelocityX() > 0
-                        && !(character instanceof Cow))
+                        && !character.isDead()
+                  )
+                )
                 {
                     character.setPositionX(rect.x - character.getHitbox().width);
-                    if (character.getVelocityY() > 0)
+                    if (character.getVelocityX() > 0)
                         character.setVelocityX(0);
+
+                    if (character instanceof Bullet)
+                        System.out.println("Bullet collided with LEFT border");
                 }
+
                 // столкновение с правой границей прямоугольника
-                else if (character.getPositionX() < rect.x + rect.width
+                else if ((character instanceof Player
+                        && character.getPositionX() < rect.x + rect.width
                         && character.getPositionX() + character.getHitbox().width > rect.x + rect.width
                         && character.getPositionY() < rect.y + rect.height
                         && character.getPositionY() + character.getHitbox().height > rect.y
+                        && character.getVelocityX() < 0)
+                    || (character instanceof Bullet
+                        && character.getPositionX() < rect.x + rect.width
                         && character.getVelocityX() < 0
-                        && !(character instanceof Cow))
+                        && !character.isDead()
+                    )
+                )
                 {
                     character.setPositionX(rect.x + rect.width);
                     if (character.getVelocityX() < 0)
                         character.setVelocityX(0);
+
+                    if (character instanceof Bullet) {
+                        System.out.println("Bullet collided with RIGHT border");
+                        character.setVelocityX(0);
+                        character.setPositionX(rect.x + rect.width + 1);
+                    }
                 }
+
                 // столкновение с верхней границей прямоугольника
-                else if (character.getPositionY() < rect.y + rect.height)
+                else if (
+                        character.getPositionY() < rect.y + rect.height
+                        && character.getPositionY() + character.getHitbox().height > rect.y + rect.height)
                 {
                     character.setPositionY(rect.y + rect.height);
                     character.setVelocityY(0);
@@ -112,14 +135,29 @@ public class Level {
                         character.setAccelX(0);
                         character.setVelocity(0, 0);
                     }
+
+                    if (character instanceof Bullet && !character.isDead)
+                        System.out.println("Bullet collided with TOP border");
                 }
+
                 // столкновение с нижней границей прямоугольника
-                else if (character.getPositionY() + character.getHitbox().height > rect.y
-                        && character.getPositionY() < rect.y)
+                else if (!(character instanceof Bullet)
+                        && character.getPositionY() + character.getHitbox().height > rect.y
+                        && character.getPositionY() < rect.y
+                        && character.getPositionY() + character.getHitbox().height - rect.y < character.getHitbox().height * 0.4)
                 {
-                    character.setPositionY(rect.y - character.getHitbox().height);
+                    character.setPositionY(rect.y + rect.height + 1);
                     character.setVelocityY(0);
+                    if (character instanceof Player)
+                        character.setVelocityY(character.getJumpVelocityY());
+                    else
+                        // Убрать этот else, если надо, чтобы нижняя граница блока не подбрасывала коров
+                        character.setVelocityY(300);
+
                 }
+
+                if (character instanceof Bullet && !character.isDead())
+                    character.takeDamage(delta, 1);
             }
         }
     }

@@ -25,10 +25,10 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import xyz.gdxshooter.Characters.Bullet;
 import xyz.gdxshooter.Characters.Character;
 import xyz.gdxshooter.GameMain;
+import xyz.gdxshooter.GameScreens.CutScene;
 import xyz.gdxshooter.GameScreens.LevelsScreen;
-import xyz.gdxshooter.GameScreens.MenuScreen;
 import xyz.gdxshooter.GameScreens.PlayScreen;
-import xyz.gdxshooter.GameScreens.Level;
+import xyz.gdxshooter.Level;
 import xyz.gdxshooter.Characters.Player;
 
 public class Hud {
@@ -37,17 +37,11 @@ public class Hud {
 
     public Stage stage;
     private Viewport viewport;
-    private Integer worldTimer;
-    private float timeCount;
-    private static Integer score;
 
     private Label coordLabel;
     private Label velocityLabel;
     private Label accelLabel;
-    private Label scoreLabel;
-    private Label levelLabel;
-    private Label worldLabel;
-    private Label marioLabel;
+
 
     private Texture myTextureMenuButton;
     private TextureRegion myTextureRegionMenu;
@@ -83,9 +77,6 @@ public class Hud {
         this.game = game;
         this.playScreen = playScreen;
 
-        worldTimer = 300;
-        timeCount = 0;
-        score = 0;
 
         viewport = new FitViewport(GameMain.SCREEN_WIDTH, GameMain.SCREEN_HEIGHT, new OrthographicCamera());
         stage = new Stage(viewport, batch);
@@ -99,37 +90,23 @@ public class Hud {
         velocityLabel = new Label("Vx: Vy: ", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
         accelLabel = new Label("Ax: Ay: ", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
 
-        scoreLabel = new Label(String.format("%06d", score), new Label.LabelStyle(new BitmapFont(), Color.WHITE));
-        levelLabel = new Label("1-1", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
-        worldLabel = new Label("WORLD", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
-        marioLabel = new Label("MOODUCK", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
-
-        if (GameMain.DEBUG)
-            table.add(marioLabel).expandX().padTop(10);
-        table.add().expandX().padTop(10);
-        table.add().expandX().padTop(10);
-        table.add(worldLabel).expandX().padTop(10);
-        table.add(coordLabel).expandX().padTop(10);
-
-        table.row();
-        if (GameMain.DEBUG) {
-            table.add(scoreLabel).expandX();
-            table.add(levelLabel).expandX();
-        }
-        table.add().expandX();
-        table.add().expandX();
-        table.add(velocityLabel).expandX();
-        table.add(accelLabel).expandX();
-
         AssetManager manager = game.assetManager;
+
+        if (playScreen.levelIdx !=3) {
+            manager.load("Music/Theme/DemoMusic.mp3", Music.class);
+            manager.finishLoading();
+            theme = manager.get("Music/Theme/DemoMusic.mp3", Music.class);
+        }
+        else {
+            manager.load("Music/Theme/WinterTheme.mp3", Music.class);
+            manager.finishLoading();
+            theme = manager.get("Music/Theme/WinterTheme.mp3", Music.class);
+        }
+
         manager.load("Music/Sounds/FireButtonSound.wav", Music.class);
         manager.finishLoading();
         firebuttonSound = manager.get("Music/Sounds/FireButtonSound.wav", Music.class);
         firebuttonSound.setVolume(0.15f);
-
-        manager.load("Music/Theme/DemoMusic.mp3", Music.class);
-        manager.finishLoading();
-        theme = manager.get("Music/Theme/DemoMusic.mp3", Music.class);
 
         manager.load("Music/Sounds/LoseSound.mp3", Music.class);
         manager.finishLoading();
@@ -212,11 +189,24 @@ public class Hud {
         this.walkingController = new WalkingController(this.viewport, controllerSkin);
 
         lastFrameHp = 0;
-        Image hp3 = new Image(new Texture(Gdx.files.internal("Hud/HealthPoints3.png")));
-        Image hp2 = new Image(new Texture(Gdx.files.internal("Hud/HealthPoints2.png")));
-        Image hp1 = new Image(new Texture(Gdx.files.internal("Hud/HealthPoints1.png")));
-        Image hp0 = new Image(new Texture(Gdx.files.internal("Hud/HealthPoints0.png")));
-        hpImages = new Array<>(new Image[] {hp0, hp1, hp2, hp3});
+        Image hp3;
+        Image hp2;
+        Image hp1;
+        Image hp0;
+        if (LevelsScreen.SkinID == 0) {
+            hp3 = new Image(new Texture(Gdx.files.internal("Hud/HP/HealthPoints3.png")));
+            hp2 = new Image(new Texture(Gdx.files.internal("Hud/HP/HealthPoints2.png")));
+            hp1 = new Image(new Texture(Gdx.files.internal("Hud/HP/HealthPoints1.png")));
+            hp0 = new Image(new Texture(Gdx.files.internal("Hud/HP/HealthPoints0.png")));
+
+        } else {
+            hp3 = new Image(new Texture(Gdx.files.internal("Hud/SkinHP/HealthPoints3.png")));
+            hp2 = new Image(new Texture(Gdx.files.internal("Hud/SkinHP/HealthPoints2.png")));
+            hp1 = new Image(new Texture(Gdx.files.internal("Hud/SkinHP/HealthPoints1.png")));
+            hp0 = new Image(new Texture(Gdx.files.internal("Hud/SkinHP/HealthPoints0.png")));
+
+        }
+        hpImages = new Array<>(new Image[]{hp0, hp1, hp2, hp3});
 
         for (Image hpImage : hpImages) {
             hpImage.setScale(1.75f,1.75f);
@@ -262,7 +252,7 @@ public class Hud {
         });
     }
 
-    public void render(float delta, Player player, Array<Character> otherChars, Array<Bullet> bullets, Level level) {
+    public void render(float runTime, Player player, Array<Character> otherChars, Array<Bullet> bullets, Level level) {
         Gdx.input.setInputProcessor(stage);
 
         if (lastFrameHp != player.getHp()) {
@@ -294,7 +284,7 @@ public class Hud {
                 player.jump();
 
             if (firebutton.isPressed()) {
-                Bullet bullet = player.shoot(delta);
+                Bullet bullet = player.shoot(runTime);
                 if (bullet != null) {
                     firebuttonSound.play();
                     otherChars.add(bullet);
@@ -339,7 +329,12 @@ public class Hud {
                     else if (levelIdx == 2)
                         game.setScreen(new PlayScreen(game, 3));
                     else if (levelIdx == 3)
-                        game.setScreen(new MenuScreen(game));
+                        game.setScreen(new PlayScreen(game, 4));
+                    else if (levelIdx == 4)
+                        game.setScreen(new PlayScreen(game, 5));
+                    else if (levelIdx == 5) {
+                        game.setScreen(new CutScene(game));
+                    }
                 }
             }
         }

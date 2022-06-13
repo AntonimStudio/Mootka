@@ -24,8 +24,11 @@ import xyz.gdxshooter.Characters.CowType;
 import xyz.gdxshooter.GameMain;
 import xyz.gdxshooter.Hud.Hud;
 import xyz.gdxshooter.Characters.Player;
+import xyz.gdxshooter.Level;
 
 public class PlayScreen implements Screen {
+
+    public int levelIdx;
 
     private GameMain game;
 
@@ -62,6 +65,21 @@ public class PlayScreen implements Screen {
     private Texture blackCowTextureRun2;
     private Animation<Texture> blackCowMovingAnim;
 
+    private Texture babyCowTexture;
+    private Texture babyCowTextureDead;
+    private Texture babyCowTextureRun1;
+    private Texture babyCowTextureRun2;
+    private Animation<Texture> babyCowMovingAnim;
+
+    private Texture roboCowTexture;
+    private Texture roboCowTextureDead;
+    private Texture roboCowTextureStay;
+    private Texture roboCowTextureStay1;
+    private Texture roboCowTextureStay2;
+    private Texture roboCowTextureStay3;
+    private Texture roboCowTextureStay4;
+    private Animation<Texture> roboCowMovingAnim;
+
     private Texture bulletTexture;
 
     private Texture playerTexture;
@@ -73,8 +91,7 @@ public class PlayScreen implements Screen {
     private Array<Character> allNPC;
     private Array<Cow> cows;
     private Array<Bullet> bullets;
-    private int levelIdx;
-
+    private Animation<Texture> playerMovingAnim;
     private Music cowHurt;
 
     private int i;
@@ -93,18 +110,23 @@ public class PlayScreen implements Screen {
 
         cowHurt = game.assetManager.get("Music/Sounds/PlayerHurtSound.wav", Music.class);
         // cowHurt = game.assetManager.get("Music/Sounds/CowHurtSound.wav", Music.class);
-
-        playerTexture = new Texture(Gdx.files.internal("Player/player.png"));
-        playerTextureRun1 = new Texture(Gdx.files.internal("Player/AnimationRun1.png"));
-        playerTextureRun2 = new Texture(Gdx.files.internal("Player/AnimationRun2.png"));
-        Animation<Texture> playerMovingAnim = new Animation<>(
+        if (LevelsScreen.SkinID == 0) {
+            playerTexture = new Texture(Gdx.files.internal("Player/player.png"));
+            playerTextureRun1 = new Texture(Gdx.files.internal("Player/AnimationRun1.png"));
+            playerTextureRun2 = new Texture(Gdx.files.internal("Player/AnimationRun2.png"));
+        } else {
+            playerTexture = new Texture(Gdx.files.internal("Player/NewSkin/player.png"));
+            playerTextureRun1 = new Texture(Gdx.files.internal("Player/NewSkin/AnimationRun1.png"));
+            playerTextureRun2 = new Texture(Gdx.files.internal("Player/NewSkin/AnimationRun2.png"));
+        }
+        playerMovingAnim = new Animation<>(
                 0.17f,
-                new Array<>(new Texture[] {playerTextureRun1, playerTextureRun2}),
+                new Array<>(new Texture[]{playerTextureRun1, playerTextureRun2}),
                 Animation.PlayMode.LOOP);
-
         bulletTexture = new Texture(Gdx.files.internal("Player/Bullet.png"));
         Music playerHurt = game.assetManager.get("Music/Sounds/PlayerHurtSound.wav");
-        player = new Player(new Vector2(30, 150),
+
+        player = new Player(new Vector2(20, 150),
                             22,
                             40,
                             3,
@@ -147,6 +169,27 @@ public class PlayScreen implements Screen {
                 new Array<>(new Texture[] {blackCowTextureRun1, blackCowTextureRun2}),
                 Animation.PlayMode.LOOP);
 
+        babyCowTexture = new Texture(Gdx.files.internal("Enemy/BabyCow/BabyCow.png"));
+        babyCowTextureDead = new Texture(Gdx.files.internal("Enemy/BabyCow/BabyCowDead.png"));
+        babyCowTextureRun1 = new Texture(Gdx.files.internal("Enemy/BabyCow/BabyCowRun1.png"));
+        babyCowTextureRun2 = new Texture(Gdx.files.internal("Enemy/BabyCow/BabyCowRun2.png"));
+        babyCowMovingAnim = new Animation<>(
+                0.15f,
+                new Array<>(new Texture[] {babyCowTextureRun1, babyCowTextureRun2}),
+                Animation.PlayMode.LOOP);
+
+        roboCowTexture = new Texture(Gdx.files.internal("Enemy/RoboCow/RoboCowStay4.png"));
+        roboCowTextureDead = new Texture(Gdx.files.internal("Enemy/RoboCow/RoboCowDead.png"));
+        roboCowTextureStay = new Texture(Gdx.files.internal("Enemy/RoboCow/RoboCowStay.png"));
+        roboCowTextureStay1 = new Texture(Gdx.files.internal("Enemy/RoboCow/RoboCowStay1.png"));
+        roboCowTextureStay2 = new Texture(Gdx.files.internal("Enemy/RoboCow/RoboCowStay2.png"));
+        roboCowTextureStay3 = new Texture(Gdx.files.internal("Enemy/RoboCow/RoboCowStay3.png"));
+        roboCowTextureStay4 = new Texture(Gdx.files.internal("Enemy/RoboCow/RoboCowStay4.png"));
+        roboCowMovingAnim = new Animation<>(
+                0.2f,
+                new Array<>(new Texture[] {roboCowTextureStay1, roboCowTextureStay2, roboCowTextureStay3, roboCowTextureStay4}),
+                Animation.PlayMode.LOOP);
+
         maploader = new TmxMapLoader();
 
         if (levelIdx == 1) {
@@ -156,6 +199,7 @@ public class PlayScreen implements Screen {
             Vector2 pos1 = new Vector2(300, 150);
             Array<Float> routePointsX1 = new Array<>(new Float[]{70f, 700f});
             spawnCow(pos1, routePointsX1, CowType.WHITE);
+
 
             Vector2 pos2 = new Vector2(800, 150);
             Array<Float> routePointsX2 = new Array<>(new Float[]{20f, 300f, 100f, 800f});
@@ -194,7 +238,7 @@ public class PlayScreen implements Screen {
                 } else if (i == 8) {
                     Vector2 pos = new Vector2(1272, 150);
                     Array<Float> routePointsX = new Array<>(new Float[]{1600f, 1200f, 1700f, 1272f});
-                    spawnCow(pos, routePointsX, CowType.WHITE);
+                    spawnCow(pos, routePointsX, CowType.BABY);
                 } /*else if (i == 9) {
                     Vector2 pos = new Vector2(2200, 150);
                     Array<Float> routePointsX = new Array<>(new Float[]{1800f, 2330f});
@@ -239,11 +283,9 @@ public class PlayScreen implements Screen {
                     Array<Float> routePointsX = new Array<>(new Float[]{1080f, 600f, 800f, 100f});
                     spawnCow(pos, routePointsX, CowType.WHITE);
                 } else if (i == 6) {
-
                     Vector2 pos = new Vector2(1176, 72);
                     Array<Float> routePointsX = new Array<>(new Float[]{1176f, 1500f, 1176f, 1350f});
                     spawnCow(pos, routePointsX, CowType.WHITE);
-
                 } else if (i == 7) {
                     Vector2 pos = new Vector2(1656, 170);
                     Array<Float> routePointsX = new Array<>(new Float[]{1872f,1600f});
@@ -273,13 +315,113 @@ public class PlayScreen implements Screen {
         }
 
         else if (levelIdx == 4) {
+            background = new Texture(Gdx.files.internal("Level4/background.png"));
+            map = maploader.load("Level4/Level4.tmx");
 
+            for (int i = 1; i <= 14; i++) {
+                if (i == 1) {
+                    Vector2 pos = new Vector2(360, 90);
+                    Array<Float> routePointsX = new Array<>(new Float[]{100f, 650f});
+                    spawnCow(pos, routePointsX, CowType.BROWN);
+                } else if (i == 2) {
+                        Vector2 pos = new Vector2(792, 150);
+                        Array<Float> routePointsX = new Array<>(new Float[]{750f, 870f});
+                        spawnCow(pos, routePointsX, CowType.BABY);
+                } else if (i == 3) {
+                    Vector2 pos = new Vector2(500, 90);
+                    Array<Float> routePointsX = new Array<>(new Float[]{728f, 28f, 450f, 100f});
+                    spawnCow(pos, routePointsX, CowType.WHITE);
+                } else if (i == 4) {
+                    Vector2 pos = new Vector2(600, 96);
+                    Array<Float> routePointsX = new Array<>(new Float[]{320f, 670f});
+                    spawnCow(pos, routePointsX, CowType.BLACK);
+                } else if (i == 5) {
+                    Vector2 pos = new Vector2(900, 80);
+                    Array<Float> routePointsX = new Array<>(new Float[]{200f, 800f, 100f, 900f});
+                    spawnCow(pos, routePointsX, CowType.BABY);
+                } else if (i == 6) {
+                    Vector2 pos = new Vector2(600, 72);
+                    Array<Float> routePointsX = new Array<>(new Float[]{60f, 1500f, 1176f, 1350f});
+                    spawnCow(pos, routePointsX, CowType.BABY);
+                } else if (i == 7) {
+                    Vector2 pos = new Vector2(1080, 90);
+                    Array<Float> routePointsX = new Array<>(new Float[]{2100f, 1080f});
+                    spawnCow(pos, routePointsX, CowType.BROWN);
+                } else if (i == 8) {
+                    Vector2 pos = new Vector2(1420, 90);
+                    Array<Float> routePointsX = new Array<>(new Float[]{1080f, 2100f, 1300f, 1900f});
+                    spawnCow(pos, routePointsX, CowType.WHITE);
+                } else if (i == 9) {
+                    Vector2 pos = new Vector2(1280, 90);
+                    Array<Float> routePointsX = new Array<>(new Float[]{1500f, 1150f});
+                    spawnCow(pos, routePointsX, CowType.BLACK);
+                } else if (i == 10) {
+                    Vector2 pos = new Vector2(1080, 90);
+                    Array<Float> routePointsX = new Array<>(new Float[]{1900f, 2000f});
+                    spawnCow(pos, routePointsX, CowType.ROBO);
+                } else if (i == 11) {
+                    Vector2 pos = new Vector2(1880, 90);
+                    Array<Float> routePointsX = new Array<>(new Float[]{1100f, 2000f});
+                    spawnCow(pos, routePointsX, CowType.BABY);
+                } else if (i == 12) {
+                    Vector2 pos = new Vector2(2100, 90);
+                    Array<Float> routePointsX = new Array<>(new Float[]{1900f, 2330f});
+                    spawnCow(pos, routePointsX, CowType.ROBO);
+                }else if (i == 13) {
+                    Vector2 pos = new Vector2(1760, 90);
+                    Array<Float> routePointsX = new Array<>(new Float[]{1900f, 2330f});
+                    spawnCow(pos, routePointsX, CowType.ROBO);
+                }else if (i == 14) {
+                    Vector2 pos = new Vector2(2400, 150);
+                    Array<Float> routePointsX = new Array<>(new Float[]{1900f, 2330f, 2000f});
+                    spawnCow(pos, routePointsX, CowType.ROBO);
+                }
+            }
         }
 
         else if (levelIdx == 5) {
+            background = new Texture(Gdx.files.internal("Level5/background.png"));
+            map = maploader.load("Level5/Level5.tmx");
 
+            for (int i = 1; i <= 12; i++) {
+                if (i == 1) {
+                    Vector2 pos = new Vector2(250, 100);
+                    Array<Float> routePointsX = new Array<>(new Float[]{10f, 728f});
+                    spawnCow(pos, routePointsX, CowType.BABY);
+                } else if (i == 3) {
+                    Vector2 pos = new Vector2(370, 100);
+                    Array<Float> routePointsX = new Array<>(new Float[]{20f, 728f, 200f, 480f});
+                    spawnCow(pos, routePointsX, CowType.WHITE);
+                } else if (i == 4) {
+                    Vector2 pos = new Vector2(700, 96);
+                    Array<Float> routePointsX = new Array<>(new Float[]{650f, 900f});
+                    spawnCow(pos, routePointsX, CowType.BLACK);
+                } else if (i == 5) {
+                    Vector2 pos = new Vector2(650, 150);
+                    Array<Float> routePointsX = new Array<>(new Float[]{1080f, 600f, 800f, 100f});
+                    spawnCow(pos, routePointsX, CowType.ROBO);
+                } else if (i == 6) {
+                    Vector2 pos = new Vector2(1100, 72);
+                    Array<Float> routePointsX = new Array<>(new Float[]{20f, 728f, 200f, 480f});
+                    spawnCow(pos, routePointsX, CowType.ROBO);
+                }else if (i == 7) {
+                    Vector2 pos = new Vector2(1200, 100);
+                    Array<Float> routePointsX = new Array<>(new Float[]{20f, 728f, 200f, 480f});
+                    spawnCow(pos, routePointsX, CowType.ROBO);
+                }
+                else if (i == 8) {
+                    Vector2 pos = new Vector2(475, 100);
+                    Array<Float> routePointsX = new Array<>(new Float[]{20f, 728f, 200f, 480f});
+                    spawnCow(pos, routePointsX, CowType.BROWN);
+                }else if (i == 9) {
+                    Vector2 pos = new Vector2(1300, 100);
+                    Array<Float> routePointsX = new Array<>(new Float[]{20f, 728f, 200f, 480f});
+                    spawnCow(pos, routePointsX, CowType.ROBO);
+                }
+
+                }
         }
-        level = new Level(map);
+        level = new Level(map, levelIdx);
         mapRenderer =  new OrthogonalTiledMapRenderer(map);
 
         runTime = 0;
@@ -295,7 +437,7 @@ public class PlayScreen implements Screen {
         runTime += delta;
 
         /* обработка ввода игрока и обновление худа */
-        hud.render(delta, player, allNPC, bullets, level);
+        hud.render(runTime, player, allNPC, bullets, level);
         for (Character character : allNPC)
             if (!character.isDead() && character instanceof Cow)
                 ((Cow) character).control();
@@ -410,21 +552,27 @@ public class PlayScreen implements Screen {
     }
 
     private void spawnCow(Vector2 pos, Array<Float> routePointsX, CowType cowType) {
-        Cow cow;
-        if (cowType == CowType.WHITE) {
-            cow = new Cow(pos, 61, 42, 70, 2, cowType,
-                    whiteCowTexture, whiteCowTextureDead, whiteCowMovingAnim, routePointsX, cowHurt);
+        if (GameMain.SPAWN_ENEMIES) {
+            Cow cow;
+            if (cowType == CowType.WHITE) {
+                cow = new Cow(pos, 61, 42, 70, 2, cowType,
+                        whiteCowTexture, whiteCowTextureDead, whiteCowMovingAnim, routePointsX, cowHurt);
+            } else if (cowType == CowType.BROWN) {
+                cow = new Cow(pos, 61, 42, 49, 4, cowType,
+                        brownCowTexture, brownCowTextureDead, brownCowMovingAnim, routePointsX, cowHurt);
+            } else if (cowType == CowType.BLACK) {
+                cow = new Cow(pos, 73, 49, 35, 10, cowType,
+                        blackCowTexture, blackCowTextureDead, blackCowMovingAnim, routePointsX, cowHurt);
+            } else if (cowType == CowType.BABY) {
+                cow = new Cow(pos, 48, 39, 110, 1, cowType,
+                        babyCowTexture, babyCowTextureDead, babyCowMovingAnim, routePointsX, cowHurt);
+            } else {
+                cow = new Cow(pos, 67, 42, 0, 3, cowType,
+                        roboCowTexture, roboCowTextureDead, roboCowMovingAnim, routePointsX, cowHurt);
+            }
+            allNPC.add(cow);
+            cows.add(cow);
         }
-        else if (cowType == CowType.BROWN) {
-            cow = new Cow(pos, 61, 42, 46, 4, cowType,
-                    brownCowTexture, brownCowTextureDead, brownCowMovingAnim, routePointsX, cowHurt);
-        }
-        else {
-            cow = new Cow(pos, 73, 49, 30, 15, cowType,
-                    blackCowTexture, blackCowTextureDead, blackCowMovingAnim, routePointsX, cowHurt);
-        }
-        allNPC.add(cow);
-        cows.add(cow);
     }
 
     @Override

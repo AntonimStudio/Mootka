@@ -10,7 +10,7 @@ public class Player extends Character {
 
     /** Cooldown of the shoot */
     private float shootCD; // Fire sound длительность 0.57 секунды
-    private float shootRemainCD;
+    private float lastShootTime;
 
     /** Amount of time when character is immune after taking damage */
     private float takeDamageCD;
@@ -26,8 +26,8 @@ public class Player extends Character {
         this.jumpVelocityY = 450;
         this.bulletTexture = bulletTexture;
 
-        shootCD = 0.5f;
-        shootRemainCD = 0f;
+        shootCD = 0.7f;
+        lastShootTime = 0f;
 
         takeDamageCD = 0.7f;
         takeDamageRemainCD = 0f;
@@ -44,20 +44,20 @@ public class Player extends Character {
             this.direction = Direction.LEFT;
     }
 
-    public Bullet shoot(float delta) {
-        if (shootRemainCD <= 0) {
+    public Bullet shoot(float runTime) {
+        if (runTime - lastShootTime >= shootCD) {
+            lastShootTime = runTime;
             Vector2 bulletPos = new Vector2(getPositionX() + getHitbox().width -2,
                     getPositionY() + getHitbox().height / 2f - 4);
-            shootRemainCD = shootCD;
             return new Bullet(bulletPos, 7, 4, 1, direction, bulletTexture);
         }
         else {
-            shootRemainCD -= delta;
             return null;
         }
     }
 
     public void takeDamage(float delta, int hits) {
+        // TODO: same fix as in shoot(), with runTime instead of delta
         if (takeDamageRemainCD > 0) {
             takeDamageRemainCD -= delta;
         }

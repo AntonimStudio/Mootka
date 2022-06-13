@@ -5,6 +5,7 @@ sourceSets.main.resources.srcDirs = ["../assets"]
 project.ext.mainClassName = "xyz.gdxshooter.DesktopLauncher"
 project.ext.assetsDir = new File("../assets")
 
+
 import org.gradle.internal.os.OperatingSystem
 
 task run(dependsOn: classes, type: JavaExec) {
@@ -40,7 +41,6 @@ task dist(type: Jar) {
     }
     with jar
 }
-
 
 dist.dependsOn classes
 

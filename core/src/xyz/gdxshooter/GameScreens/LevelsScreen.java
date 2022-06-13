@@ -24,7 +24,7 @@ public class LevelsScreen implements Screen {
     private GameMain game;
 
     private Stage stage;
-
+    public static int SkinID = 0;
     private ImageButton level1button;
     private ImageButton level2button;
     private ImageButton level3button;
@@ -39,6 +39,13 @@ public class LevelsScreen implements Screen {
     private TextureRegion myTextureRegionExit;
     private Image background;
     private TextureRegionDrawable myTexRegionDrawableExit;
+
+    private ImageButton mooduckbutton;
+    private ImageButton drakebutton;
+
+    private Texture myTextureMooduckSkinButton;
+    private TextureRegion myTextureRegionMooduckSkin;
+    private TextureRegionDrawable myTexRegionDrawableMooduckSkin;
 
     public LevelsScreen(final GameMain game) {
         this.game = game;
@@ -117,6 +124,26 @@ public class LevelsScreen implements Screen {
                 0.6f*levelButtonHeight);
         exitbutton.setScale(levelButtonWidth,levelButtonHeight);
 
+        myTextureMooduckSkinButton = new Texture(Gdx.files.internal("Levels/MooduckSkin.png"));
+        myTextureRegionMooduckSkin = new TextureRegion(myTextureMooduckSkinButton);
+        myTexRegionDrawableMooduckSkin = new TextureRegionDrawable(myTextureRegionMooduckSkin);
+        myTexRegionDrawableMooduckSkin.setMinSize(1.5f*levelButtonWidth, 1.5f*levelButtonHeight);
+        mooduckbutton = new ImageButton(myTexRegionDrawableMooduckSkin, new TextureRegionDrawable(
+                new TextureRegion(new Texture(Gdx.files.internal("Levels/MooduckSkinPressed.png")))));
+        mooduckbutton.setPosition(0.5f*GameMain.SCREEN_WIDTH - 1.5f*levelButtonWidth,
+                0.5f*levelButtonHeight);
+        mooduckbutton.setScale(levelButtonWidth,levelButtonHeight);
+
+        myTextureMooduckSkinButton = new Texture(Gdx.files.internal("Levels/DrakeSkin.png"));
+        myTextureRegionMooduckSkin = new TextureRegion(myTextureMooduckSkinButton);
+        myTexRegionDrawableMooduckSkin = new TextureRegionDrawable(myTextureRegionMooduckSkin);
+        myTexRegionDrawableMooduckSkin.setMinSize(1.5f*levelButtonWidth, 1.5f*levelButtonHeight);
+        drakebutton = new ImageButton(myTexRegionDrawableMooduckSkin, new TextureRegionDrawable(
+                new TextureRegion(new Texture(Gdx.files.internal("Levels/DrakeSkinPressed.png")))));
+        drakebutton.setPosition(0.5f*GameMain.SCREEN_WIDTH + 0.5f*levelButtonWidth,
+                0.5f*levelButtonHeight);
+        drakebutton.setScale(levelButtonWidth,levelButtonHeight);
+
         AssetManager manager = new AssetManager();
         manager.load("Music/Sounds/LevelsButtonSound.wav", Music.class);
         manager.finishLoading();
@@ -164,6 +191,8 @@ public class LevelsScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 buttonsound.setVolume(0.5f);
                 buttonsound.play();
+                game.getMenuTheme().stop();
+                game.setScreen(new PlayScreen(game, 4));
             }
         };
         level4button.addCaptureListener(changeListener4);
@@ -173,6 +202,8 @@ public class LevelsScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 buttonsound.setVolume(0.5f);
                 buttonsound.play();
+                game.getMenuTheme().stop();
+                game.setScreen(new PlayScreen(game, 5));
             }
         };
         level5button.addCaptureListener(changeListener5);
@@ -196,8 +227,30 @@ public class LevelsScreen implements Screen {
         };
         exitbutton.addCaptureListener(changeListener1);
 
+        ChangeListener changeListener10 = new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                buttonsound.setVolume(0.5f);
+                buttonsound.play();
+                SkinID = 0;
+            }
+        };
+        mooduckbutton.addCaptureListener(changeListener10);
+
+        ChangeListener changeListenerDrake = new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                buttonsound.setVolume(0.5f);
+                buttonsound.play();
+                SkinID = 1;
+            }
+        };
+        drakebutton.addCaptureListener(changeListenerDrake);
+
         background.setScale(0.8f,0.8f);
         stage.addActor(background);
+        stage.addActor(mooduckbutton);
+        stage.addActor(drakebutton);
         stage.addActor(exitbutton);
 
         stage.addActor(level1button);
@@ -206,7 +259,6 @@ public class LevelsScreen implements Screen {
         stage.addActor(level4button);
         stage.addActor(level5button);
         stage.addActor(level6button);
-
     }
 
     @Override

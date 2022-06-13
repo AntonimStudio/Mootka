@@ -162,6 +162,10 @@ public class Character {
         return maxSpeedX;
     }
 
+    public float getJumpVelocityY() {
+        return this.jumpVelocityY;
+    }
+
     public boolean isCollisionDown() {
         return isCollisionDown;
     }
